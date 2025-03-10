@@ -19,6 +19,7 @@ public class NaServerApplication {
 	ApplicationRunner init(IngredientRepo repository){
 		return args -> {
 			repository.save(new Ingredient("Soy Sauce",1,"tablespoon",900));
+			repository.save(new Ingredient("Fish Sauce",1,"tablespoon",600));
 			repository.findAll().forEach(System.out::println);
 		};
 	}
