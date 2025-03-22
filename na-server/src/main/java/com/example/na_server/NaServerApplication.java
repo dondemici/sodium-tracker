@@ -8,10 +8,18 @@ import org.springframework.context.annotation.Bean;
 import com.example.na_server.model.Ingredient;
 import com.example.na_server.model.IngredientRepo;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 @SpringBootApplication
 public class NaServerApplication {
 
 	public static void main(String[] args) {
+		        // Load .env variables
+        Dotenv dotenv = Dotenv.load();
+        System.setProperty("AUTH0_ISSUER_URI", dotenv.get("AUTH0_ISSUER_URI"));
+        System.setProperty("AUTH0_CLIENT_ID", dotenv.get("AUTH0_CLIENT_ID"));
+        System.setProperty("AUTH0_CLIENT_SECRET", dotenv.get("AUTH0_CLIENT_SECRET"));
+		
 		SpringApplication.run(NaServerApplication.class, args);
 	}
 

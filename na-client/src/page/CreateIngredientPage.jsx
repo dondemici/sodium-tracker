@@ -1,62 +1,60 @@
-import { useEffect, useState } from "react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useState } from "react";
 import axios from "axios";
 import "./CreateIngredient.css";
 
+const API_URL = "http://localhost:8080/api/";
 
-const API_URL = "http://localhost:8080/api/"
+function CreateIngredientPage({ setIngredients }) {
+    const { getAccessTokenSilently } = useAuth0(); // Get token from Auth0
+    const [name, setName] = useState(null);
+    const [quantity, setQuantity] = useState(null);
+    const [unitGauge, setUnitGauge] = useState(null);
+    const [naContent, setNaContent] = useState(null);
 
-function CreateIngredientPage({setIngredients}){
-    const[name, setName] = useState(null);
-    const[quantity, setQuantity] = useState(null);
-    const[unitGauge, setUnitGauge] = useState(null);
-    const[naContent, setNaContent] = useState(null);
+    const CreateIngredient = async (e) => {
+        e.preventDefault();
 
-const CreateIngredient = async (e) => {
-    e.preventDefault();
+        const ingredient = {
+            name: name,
+            quantity: quantity,
+            unitGauge: unitGauge,
+            naContent: naContent,
+        };
 
-    const ingredient = {
-        name: name,
-        quantity: quantity,
-        unitGauge: unitGauge,
-        naContent: naContent
+        try {
+            const token = await getAccessTokenSilently(); // Get JWT token
+
+            // Send the token with the request headers
+            await axios.post(API_URL + "ingredients", ingredient, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Add the token in the Authorization header
+                },
+            });
+            console.log("Ingredient created successfully");
+
+            // Fetch the latest ingredients with the token
+            const updatedResponse = await axios.get(API_URL + "ingredients", {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Send token with the get request
+                },
+            });
+            setIngredients(updatedResponse.data);  // Update table with the latest list
+
+            // Clear input fields
+            setName("");
+            setQuantity("");
+            setUnitGauge("");
+            setNaContent("");
+
+            alert("Creation successful!");
+        } catch (error) {
+            console.error("Error creating ingredient:", error);
+            alert("Creation not successful");
+        }
     };
 
-    try {
-        await axios.post(API_URL + "ingredients", ingredient);
-        console.log("Ingredient created successfully");
-
-        // Fetch the latest ingredients
-        const updatedResponse = await axios.get(API_URL + "ingredients");
-        setIngredients(updatedResponse.data);  // Update table with the latest list
-
-        // Clear input fields
-        setName("");
-        setQuantity("");
-        setUnitGauge("");
-        setNaContent("");
-
-        alert("Creation successful!");
-    } catch (error) {
-        console.error("Error creating ingredient:", error);
-        alert("Creation not successful");
-    }
-};
-
-    //const oniNameChange = (event) => {setName(event.target.value);}
-    //const oniQuantity = (event) => {setQuantity(event.target.value);}
-    //const oniUnitGauge = (event) => {setUnitGauge(event.target.value);}
-    //const oninaContent = (event) => {setNaContent(event.target.value);}
-
-    return(
-                //<div>
-                //    <h1>Create Ingredient</h1>
-                //    <input type = "text" placeholder = "Ingredient Name" onChange={oniNameChange}/>
-                //    <input type = "text" placeholder = "Quantity" onChange={oniQuantity}/>
-                //    <input type = "text" placeholder = "Unit Gauge" onChange={oniUnitGauge}/>
-                //    <input type = "text" placeholder = "Sodium Content" onChange={oninaContent}/>
-                //    <button onClick={CreateIngredient}>Submit</button>
-                //</div>
-
+    return (
         <div>
             <h2>Create Ingredient</h2>
             <form onSubmit={CreateIngredient} className="ingredient-form">
@@ -90,23 +88,20 @@ const CreateIngredient = async (e) => {
                     />
                 </div>
                 <div className="form-group">
-                        <label>Sodium Content:</label>
-                        <input
-                            type="number"
-                            value={naContent}
-                            onChange={(e) => setNaContent(e.target.value)}
-                            step="0.01" // Allow decimal values
-                            min="0" // Prevent negative numbers
-                            required
-                        />
+                    <label>Sodium Content:</label>
+                    <input
+                        type="number"
+                        value={naContent}
+                        onChange={(e) => setNaContent(e.target.value)}
+                        step="0.01" // Allow decimal values
+                        min="0" // Prevent negative numbers
+                        required
+                    />
                 </div>
                 <button type="submit" className="submit-button">Create</button>
             </form>
-
-
         </div>
     );
 }
 
 export default CreateIngredientPage;
-
